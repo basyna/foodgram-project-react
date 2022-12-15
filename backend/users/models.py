@@ -32,6 +32,9 @@ class User(AbstractUser):
     class Meta:
         ordering = ('id',)
 
+    def __str__(self) -> str:
+        return self.username
+
 
 class Follow(models.Model):
     user = models.ForeignKey(

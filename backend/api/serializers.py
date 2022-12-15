@@ -68,8 +68,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             "name",
             "image",
             "text",
-            "cooking_time"
-            )
+            "cooking_time")
 
 
 class RecipeShortSerializer(serializers.ModelSerializer):
@@ -86,8 +85,7 @@ class RecipeShortSerializer(serializers.ModelSerializer):
             "image",
             "name",
             "text",
-            "cooking_time"
-            )
+            "cooking_time")
 
 
 class IngredientRecipeSerializer(serializers.ModelSerializer):
@@ -139,8 +137,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             Amount.objects.create(
                 recipe=recipe,
                 ingredient=current_ingredient['ingredient'],
-                amount=current_ingredient['amount']
-                )
+                amount=current_ingredient['amount'])
 
     def update(self, recipe, validated_data):
         if 'ingredients' in validated_data:

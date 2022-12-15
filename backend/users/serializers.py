@@ -46,8 +46,7 @@ class RecipeForSubsciptionsSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "image",
-            "cooking_time"
-            )
+            "cooking_time")
 
 
 class UserSubscriptionsSerializer(serializers.ModelSerializer):

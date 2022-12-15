@@ -2,11 +2,13 @@ from datetime import datetime as dt
 
 from django.db.models import F, Sum
 from django.http import HttpResponse
-from rest_framework import status, viewsets
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import SAFE_METHODS, AllowAny
 from rest_framework.response import Response
 
+from api.filters import RecipeFilter
 from api.models import Amount, Favorite, Ingredient, Recipe, ShoppingCart, Tag
 from api.paginators import PageLimitPagination
 from api.permissions import IsOwnerOrReadOnly
@@ -23,36 +25,24 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Ingredient.objects.all()
+    permission_classes = [AllowAny, ]
     pagination_class = None
-    permission_classes = (AllowAny,)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('^name',)
     serializer_class = IngredientSerializer
-
-    def get_queryset(self):
-        queryset = Ingredient.objects.all()
-        search_field = self.request.query_params.get('name').lower()
-        if search_field:
-            queryset = queryset.filter(name__startswith=search_field)
-        return queryset
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
     pagination_class = PageLimitPagination
     from api.utils import create_delete_obj
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = RecipeFilter
 
     def get_queryset(self):
         queryset = Recipe.objects
-        tags = self.request.query_params.getlist('tags')
         user = self.request.user
-        if tags:
-            queryset = queryset.filter(tags__slug__in=tags).distinct()
         queryset = queryset.add_user_annotations(user.pk)
-        if self.request.query_params.get('is_favorited'):
-            queryset = queryset.filter(is_favorited=True)
-        if self.request.query_params.get('is_in_shopping_cart'):
-            queryset = queryset.filter(is_in_shopping_cart=True)
-        if self.request.query_params.get('author'):
-            queryset = queryset.filter(
-                author_id=self.request.query_params.get('author'))
         return queryset
 
     def get_permissions(self):
@@ -72,8 +62,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=True,
-        methods=['post', 'delete']
-        )
+        methods=['post', 'delete'])
     def shopping_cart(self, request, pk):
         return self.create_delete_obj(
             pk=pk,
@@ -85,8 +74,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=True,
-        methods=['post', 'delete']
-        )
+        methods=['post', 'delete'])
     def favorite(self, request, pk):
         return self.create_delete_obj(
             pk=pk,
@@ -98,9 +86,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=False,
-        methods=['get']
-        )
+        methods=['get'])
     def download_shopping_cart(self, request):
+
         """Качаем список с ингредиентами."""
         user = request.user
         if not user.shopping_cart.all().exists():
@@ -115,9 +103,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         ).annotate(amount=Sum('amount'))
         filename = f'{user.username}_shopping_list.txt'
         shopping_list = (
-                f'Список покупок для пользователя: {user.first_name}\n'
-                f'{dt.now().strftime("%H:%M  %m.%d.%Y")}\n\n'
-                )
+            f'Список покупок для пользователя: {user.first_name}\n'
+            f'{dt.now().strftime("%H:%M  %m.%d.%Y")}\n\n')
         for ing in ingredients:
             shopping_list += (
                 f'{ing["shop_ingredient"]}: {ing["amount"]}'

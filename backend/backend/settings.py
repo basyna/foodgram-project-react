@@ -5,8 +5,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('DJANGO_KEY', default='DJANGO_KEY')
 
-
-DEBUG = True
+DEBUG = os.getenv('DEBUG_STATE', default=True)
 
 AUTH_USER_MODEL = 'users.User'
 
@@ -28,6 +27,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
+    'django_filters',
     'djoser',
 ]
 
@@ -66,8 +66,8 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': os.getenv('DB_ENGINE', default='django.db.backends.postgresql'),
-        'NAME': os.getenv('DB_NAME', default='postgres'),
+        'ENGINE': os.getenv('DB_ENGINE', default='django.db.backends.sqlite3'),
+        'NAME': os.getenv('DB_NAME', default=BASE_DIR / 'db.sqlite3'),
         'USER': os.getenv('POSTGRES_USER', default='User'),
         'PASSWORD': os.getenv('POSTGRES_PASSWORD', default='Password'),
         'HOST': os.getenv('DB_HOST', default='db'),
@@ -79,8 +79,8 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME':
             (
-                'django.contrib.auth.password_validation.' +
-                'UserAttributeSimilarityValidator'
+                'django.contrib.auth.password_validation.'
+                + 'UserAttributeSimilarityValidator'
             ),
     },
     {
@@ -119,6 +119,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
+    'SEARCH_PARAM': 'name',
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],

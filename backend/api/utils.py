@@ -14,13 +14,11 @@ def create_delete_obj(
         klass: Union[Type[Favorite], Type[ShoppingCart], Type[Follow]],
         error_create_message: str,
         error_delete_message: str,
-        field_to_create_or_delete: str
-        ):
+        field_to_create_or_delete: str):
     source_object = get_object_or_404(self.get_queryset(), id=pk)
     kwargs = {
         'user': self.request.user,
-        field_to_create_or_delete: source_object
-        }
+        field_to_create_or_delete: source_object}
     if self.request.method == 'POST':
         if klass.objects.filter(**kwargs).exists():
             response = Response(
@@ -38,10 +36,8 @@ def create_delete_obj(
             response = Response(
                 serializer(
                     instance=source_object,
-                    context=context
-                    ).data,
-                status=status.HTTP_201_CREATED
-                )
+                    context=context).data,
+                status=status.HTTP_201_CREATED)
     elif self.request.method == 'DELETE':
         delete_object = klass.objects.filter(**kwargs).first()
         if delete_object is None:

@@ -1,7 +1,7 @@
 from djoser.serializers import SetPasswordSerializer
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from api.paginators import PageLimitPagination
@@ -38,18 +38,16 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(
         ["get"],
-        permission_classes=[IsOwnerOrReadOnly, ],
+        permission_classes=[IsAuthenticated, ],
         detail=False)
     def me(self, request, *args, **kwargs):
         self.get_object = self.get_instance
-        if request.method == "GET":
-            return self.retrieve(request, *args, **kwargs)
+        return self.retrieve(request, *args, **kwargs)
 
     @action(
         ["post"],
         permission_classes=[IsOwnerOrReadOnly, ],
-        detail=False
-        )
+        detail=False)
     def set_password(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -60,28 +58,24 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(
         detail=True,
         methods=['post', 'delete'],
-        permission_classes=[IsOwnerOrReadOnly, ],
-        )
+        permission_classes=[IsOwnerOrReadOnly, ], )
     def subscribe(self, request, pk):
         return self.create_delete_obj(
             pk=pk,
             klass=Follow,
             error_create_message='Вы уже подписаны на этого Автора',
             error_delete_message='Вы не подписаны на этого Автора',
-            field_to_create_or_delete='author'
-        )
+            field_to_create_or_delete='author')
 
     @action(
         detail=False,
         methods=['get'],
-        permission_classes=[IsOwnerOrReadOnly, ],
-        )
+        permission_classes=[IsOwnerOrReadOnly, ], )
     def subscriptions(self, request):
         """Получить на кого пользователь подписан."""
         user = request.user
         queryset = User.objects.filter(
-            id__in=(user.follower.values('author_id'))
-            )
+            id__in=(user.follower.values('author_id')))
         pages = self.paginate_queryset(queryset)
         serializer = UserSubscriptionsSerializer(
             pages, many=True,
