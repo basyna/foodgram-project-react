@@ -57,7 +57,8 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
             sudo docker stop $(sudo docker ps -a -q)
-            sudo docker-compose rm web
+            sudo docker system prune
+
             rm .env
             touch .env
             echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
