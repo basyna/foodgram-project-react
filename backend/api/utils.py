@@ -1,10 +1,9 @@
 from typing import Type, Union
 
+from api.models import Favorite, ShoppingCart
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.response import Response
-
-from api.models import Favorite, ShoppingCart
 from users.models import Follow
 
 
