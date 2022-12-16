@@ -67,7 +67,7 @@ jobs:
             echo DB_HOST=${{ secrets.DB_HOST }} >> .env
             echo DB_PORT=${{ secrets.DB_PORT }} >> .env
             echo DJANGO_KEY=${{ secrets.DJANGO_KEY }} >> .env
-            echo DEBUG_STATE=False >> .env
+            echo DEBUG_STATE=True >> .env
             sudo docker-compose up -d
 
   send_message:
