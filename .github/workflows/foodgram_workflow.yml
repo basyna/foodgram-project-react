@@ -57,7 +57,7 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
             sudo docker stop $(sudo docker ps -a -q)
-            sudo docker image rm basyna/foodgram_backend
+            sudo docker-compose rm web
             rm .env
             touch .env
             echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
